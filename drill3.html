@@ -532,28 +532,22 @@
   }
 
   function handleSubmit(id) {
-    const implEl   = document.getElementById(`input-impl-${id}`);
-    const premEl   = document.getElementById(`input-prem-${id}`);
-    const factEl   = document.getElementById(`input-fact-${id}`);
+    const inputEl  = document.getElementById(`input-${id}`);
     const answerEl = document.getElementById(`answer-${id}`);
     const btnEl    = document.getElementById(`submit-${id}`);
     const checkEl  = document.getElementById(`check-${id}`);
     const rowEl    = document.getElementById(`checkrow-${id}`);
 
-    implEl.disabled = true;
-    premEl.disabled = true;
-    factEl.disabled = true;
-    btnEl.disabled  = true;
+    inputEl.disabled = true;
+    btnEl.disabled   = true;
     answerEl.classList.add("visible");
     checkEl.disabled = false;
     rowEl.classList.add("enabled");
 
     const state = loadState();
     if (!state[id]) state[id] = {};
-    state[id].submitted   = true;
-    state[id].implication = implEl.value;
-    state[id].premise     = premEl.value;
-    state[id].fact        = factEl.value;
+    state[id].submitted  = true;
+    state[id].userAnswer = inputEl.value;
     saveState(state);
   }
 
@@ -609,36 +603,14 @@
         <div class="problem-text">${h(p.text)}</div>
 
         <div class="input-group">
-          <label class="input-group-label" for="input-impl-${p.id}">意味合い：</label>
+          <label class="input-group-label" for="input-${p.id}">解答欄：</label>
           <textarea
-            id="input-impl-${p.id}"
+            id="input-${p.id}"
             class="answer-textarea"
-            placeholder="意味合いを入力してください"
+            placeholder="意味合い・前提条件・個別事象を整理して入力してください"
             rows="3"
             ${dis}
-          >${h(s.implication || "")}</textarea>
-        </div>
-
-        <div class="input-group">
-          <label class="input-group-label" for="input-prem-${p.id}">前提条件：</label>
-          <textarea
-            id="input-prem-${p.id}"
-            class="answer-textarea"
-            placeholder="前提条件を入力してください"
-            rows="3"
-            ${dis}
-          >${h(s.premise || "")}</textarea>
-        </div>
-
-        <div class="input-group">
-          <label class="input-group-label" for="input-fact-${p.id}">個別事象：</label>
-          <textarea
-            id="input-fact-${p.id}"
-            class="answer-textarea"
-            placeholder="個別事象を入力してください"
-            rows="3"
-            ${dis}
-          >${h(s.fact || "")}</textarea>
+          >${h(s.userAnswer || "")}</textarea>
         </div>
 
         <div class="show-btn-wrap">
@@ -681,11 +653,9 @@
 
     const state = loadState();
     const answers = problems.map(p => ({
-      id:          p.id,
-      implication: state[p.id]?.implication ?? "（未回答）",
-      premise:     state[p.id]?.premise     ?? "（未回答）",
-      fact:        state[p.id]?.fact        ?? "（未回答）",
-      checked:     state[p.id]?.checked     ?? false
+      id:         p.id,
+      userAnswer: state[p.id]?.userAnswer ?? "（未回答）",
+      checked:    state[p.id]?.checked    ?? false
     }));
 
     const payload = {
