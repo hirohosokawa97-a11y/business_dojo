@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>研修ドリル③</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "游ゴシック", "Yu Gothic", "ヒラギノ角ゴ ProN", "Hiragino Kaku Gothic ProN", sans-serif;
+      background: #f0f4f8;
+      color: #2d3748;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #4a7c59;
+      color: white;
+      padding: 20px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    header h1 { font-size: 1.3rem; margin-bottom: 10px; font-weight: bold; }
+
+    .progress-bar-wrap {
+      background: rgba(255,255,255,0.3);
+      border-radius: 20px;
+      height: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      background: #a8e6c3;
+      height: 100%;
+      border-radius: 20px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-label { font-size: 0.85rem; margin-top: 6px; opacity: 0.9; }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    /* 問題の説明カード */
+    .intro-card {
+      background: #eaf4ef;
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 24px;
+      border-left: 5px solid #4a7c59;
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: #2d3748;
+    }
+
+    .intro-card strong { color: #4a7c59; }
+
+    .intro-example {
+      background: white;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      line-height: 1.9;
+      border: 1px solid #c6e6d2;
+    }
+
+    .intro-example .ex-label {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: #4a7c59;
+      margin-bottom: 6px;
+    }
+
+    .tree-line { padding-left: 1em; }
+
+    /* ニックネームカード */
+    .nickname-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 5px solid #4a7c59;
+    }
+
+    .nickname-card h2 {
+      font-size: 1rem;
+      color: #4a7c59;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    .nickname-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nickname-input {
+      border: 2px solid #a0aec0;
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 0.97rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+      flex: 1;
+      max-width: 300px;
+    }
+
+    .nickname-input:focus { border-color: #4a7c59; }
+
+    .nickname-note {
+      font-size: 0.83rem;
+      color: #888;
+      margin-top: 8px;
+    }
+
+    /* 問題カード */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 22px 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 5px solid #4a7c59;
+      transition: opacity 0.3s, border-color 0.3s;
+    }
+
+    .card.done {
+      border-left-color: #b0c4b8;
+      opacity: 0.72;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .card-number { font-size: 1rem; font-weight: bold; color: #4a7c59; }
+    .card.done .card-number { color: #888; }
+
+    .done-badge { display: none; font-size: 1.2rem; }
+    .card.done .done-badge { display: inline; }
+
+    /* 問題文テキスト */
+    .problem-text {
+      background: #f7fafc;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.97rem;
+      line-height: 1.8;
+      color: #2d3748;
+      margin-bottom: 18px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* 入力フィールドグループ */
+    .input-group {
+      margin-bottom: 14px;
+    }
+
+    .input-group-label {
+      font-size: 0.88rem;
+      font-weight: bold;
+      color: #4a7c59;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .answer-textarea {
+      width: 100%;
+      border: 2px solid #a0aec0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+      line-height: 1.7;
+      min-height: 80px;
+    }
+
+    .answer-textarea:focus { border-color: #4a7c59; }
+
+    .answer-textarea:disabled {
+      background: #f7fafc;
+      color: #718096;
+      cursor: not-allowed;
+      resize: none;
+    }
+
+    /* 解答例ボタン */
+    .show-btn-wrap {
+      text-align: center;
+      margin: 16px 0 12px;
+    }
+
+    .submit-btn {
+      background: #4a7c59;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 28px;
+      font-size: 0.97rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: bold;
+    }
+
+    .submit-btn:hover { background: #3a6248; }
+    .submit-btn:disabled { background: #a0aec0; cursor: not-allowed; }
+
+    /* 解答例ブロック */
+    .answer-section {
+      display: none;
+      background: #f0faf4;
+      border: 1px solid #c6e6d2;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 12px 0 12px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .answer-section.visible { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .answer-label {
+      font-weight: bold;
+      color: #4a7c59;
+      font-size: 0.88rem;
+      margin-bottom: 10px;
+    }
+
+    .answer-tree {
+      font-size: 0.95rem;
+      line-height: 1.9;
+      color: #2d3748;
+    }
+
+    .answer-tree .a-implication { font-weight: bold; }
+    .answer-tree .a-child { padding-left: 1.2em; color: #4a5568; }
+    .answer-tree .a-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: #4a7c59;
+      color: white;
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-left: 6px;
+      vertical-align: middle;
+      font-weight: bold;
+    }
+    .answer-tree .a-tag.tag-premise      { background: #2b6cb0; }
+    .answer-tree .a-tag.tag-fact         { background: #744210; }
+    .answer-tree .a-tag.tag-supplemented { background: #c05621; margin-left: 4px; }
+
+    /* チェックボックス行 */
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .check-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #4a7c59;
+      flex-shrink: 0;
+    }
+
+    .check-row input[type="checkbox"]:disabled { cursor: not-allowed; opacity: 0.5; }
+
+    .check-label { font-size: 0.95rem; color: #888; user-select: none; }
+    .check-row.enabled .check-label { color: #2d3748; cursor: pointer; }
+
+    /* 最終送信エリア */
+    .final-submit-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px 22px;
+      margin-top: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-left: 5px solid #2b6cb0;
+      text-align: center;
+    }
+
+    .final-submit-card h2 {
+      font-size: 1rem;
+      color: #2b6cb0;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .final-submit-card p {
+      font-size: 0.88rem;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .final-btn {
+      background: #2b6cb0;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 40px;
+      font-size: 1.05rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+
+    .final-btn:hover { background: #1a4f8a; }
+    .final-btn:disabled { background: #a0aec0; cursor: not-allowed; }
+
+    .send-result {
+      margin-top: 14px;
+      font-size: 0.93rem;
+      font-weight: bold;
+      display: none;
+    }
+
+    .send-result.success { color: #2f855a; display: block; }
+    .send-result.error   { color: #c53030; display: block; }
+
+    /* ========== スマホ対応 ========== */
+    @media (max-width: 640px) {
+      header { padding: 14px 16px; }
+      header h1 { font-size: 1.1rem; margin-bottom: 8px; }
+      .container { padding: 16px 12px 60px; }
+      .intro-card { padding: 14px 14px; font-size: 0.9rem; }
+      .nickname-card { padding: 16px 14px; }
+      .nickname-row { flex-direction: column; align-items: stretch; }
+      .nickname-input { max-width: 100%; font-size: 1rem; min-height: 44px; padding: 10px 14px; }
+      .card { padding: 16px 14px; }
+      .problem-text { font-size: 0.93rem; padding: 12px 12px; }
+      .answer-textarea { font-size: 1rem; min-height: 72px; padding: 10px 10px; }
+      .submit-btn { width: 100%; min-height: 44px; font-size: 1rem; padding: 12px 16px; }
+      .check-row { margin-top: 8px; gap: 10px; }
+      .check-row input[type="checkbox"] { width: 22px; height: 22px; }
+      .check-label { font-size: 1rem; }
+      .final-submit-card { padding: 20px 14px; }
+      .final-btn { width: 100%; padding: 14px 20px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>研修ドリル③</h1>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">完了: 0 / 0 問</div>
+</header>
+
+<div class="container">
+
+  <!-- 問題説明 -->
+  <div class="intro-card">
+    <strong>以下の文章はDeductionの3要素（前提条件・個別事象・意味合い）のうちどれかが不足しています。</strong><br>
+    不足を補いながら、論理的なツリー構造として整理してください。
+    <div class="intro-example">
+      <div class="ex-label">例題</div>
+      <div style="margin-bottom:8px; color:#555;">必要な書類がそろっていないと手続きは完了しない。今回の手続きでは、本人確認書類が提出されていない。</div>
+      <div class="ex-label">解答例</div>
+      今回の手続きは完了しない
+      <span style="font-size:0.78rem;background:#4a7c59;color:white;border-radius:4px;padding:1px 6px;font-weight:bold;">意味合い</span>
+      <span style="font-size:0.78rem;background:#c05621;color:white;border-radius:4px;padding:1px 6px;font-weight:bold;">補われた内容</span><br>
+      <span class="tree-line">└ 必要な書類がそろっていないと手続きは完了しない <span style="font-size:0.78rem;background:#2b6cb0;color:white;border-radius:4px;padding:1px 6px;font-weight:bold;">前提条件</span></span><br>
+      <span class="tree-line">└ 今回の手続きでは、本人確認書類が提出されていない <span style="font-size:0.78rem;background:#744210;color:white;border-radius:4px;padding:1px 6px;font-weight:bold;">個別事象</span></span>
+    </div>
+  </div>
+
+  <!-- ニックネーム入力 -->
+  <div class="nickname-card">
+    <h2>ニックネームを入力してください</h2>
+    <div class="nickname-row">
+      <input
+        type="text"
+        id="nickname-input"
+        class="nickname-input"
+        placeholder="例：田中"
+        maxlength="30"
+      >
+    </div>
+    <p class="nickname-note">※ 回答を送信する際にニックネームが記録されます。</p>
+  </div>
+
+  <!-- 問題リスト -->
+  <div id="problemList"></div>
+
+  <!-- 最終送信ボタン -->
+  <div class="final-submit-card">
+    <h2>回答を送信する</h2>
+    <p>全問の回答内容とニックネームをスプレッドシートに記録します。</p>
+    <button class="final-btn" id="finalSubmitBtn" onclick="handleFinalSubmit()">送信</button>
+    <div class="send-result" id="sendResult"></div>
+  </div>
+
+</div>
+
+<script>
+  const GAS_URL    = "https://script.google.com/macros/s/AKfycbyMA0XiVphFAcJuwiwj3P45hVdz7h2fwB7pDlbwc6lLweOYY8mixvvyUfOoJhVgMcg7/exec";
+  const SHEET_NAME = "deduction③";
+
+  // supplemented: どの要素が「補われた内容」か
+  //   "implication" = 意味合い
+  //   "premise"     = 前提条件
+  //   "fact"        = 個別事象
+  const problems = [
+    {
+      id: "③-1",
+      text: "予約なしでは入れないレストランに、Dさんは予約をせずに訪れた。",
+      answerImplication: "Dさんはそのレストランに入れなかった",
+      answerPremise:     "予約なしでは入れないレストランがある\n（または、そのレストランは予約なしでは入れない）",
+      answerFact:        "Dさんはそのレストランに予約をせずに訪れた",
+      supplemented:      "implication"
+    },
+    {
+      id: "③-2",
+      text: "担当者が変わると引き継ぎが必要になる。今回、Eさんはそのプロジェクトの担当者から外れることになった。",
+      answerImplication: "そのプロジェクトの引き継ぎが必要になった\n（または、Eさんはプロジェクトを引き継ぐ必要がある）",
+      answerPremise:     "担当者が変わると引き継ぎが必要になる",
+      answerFact:        "今回、Eさんはそのプロジェクトの担当者から外れることになった",
+      supplemented:      "implication"
+    },
+    {
+      id: "③-3",
+      text: "締め切りを過ぎた提出物は受け付けない。今回のFさんの報告書は受け付けられなかった。",
+      answerImplication: "今回のFさんの報告書は受け付けられなかった",
+      answerPremise:     "締め切りを過ぎた提出物は受け付けない",
+      answerFact:        "今回のFさんの報告書は締め切りを過ぎて提出された",
+      supplemented:      "fact"
+    },
+    {
+      id: "③-4",
+      text: "備品の購入にはかならず上司の承認が必要である。今回の備品購入は、Gさんが上司の承認なしに発注していた。",
+      answerImplication: "今回の備品購入は、認められない（または、却下される）",
+      answerPremise:     "備品の購入にはかならず上司の承認が必要である",
+      answerFact:        "今回の備品購入は、Gさんが上司の承認なしに発注していた",
+      supplemented:      "implication"
+    },
+    {
+      id: "③-5",
+      text: "今回の会議では、参加者全員の合意を得られた。その結果、今回の会議での決定は正式に有効となった。",
+      answerImplication: "今回の会議での決定は正式に有効となった",
+      answerPremise:     "参加者全員の合意を得た決定は、正式に有効となる",
+      answerFact:        "今回の会議では、参加者全員の合意を得られた",
+      supplemented:      "premise"
+    },
+    {
+      id: "③-6",
+      text: "顧客からのクレームにすばやく対応できると、顧客からの信頼は増す。今回Hさんは、顧客からのクレームを受けてその日のうちに対応できた。",
+      answerImplication: "今回、顧客からの信頼は増した（増した可能性が高い）",
+      answerPremise:     "顧客からのクレームにすばやく対応できると、顧客からの信頼は増す",
+      answerFact:        "今回Hさんは、顧客からのクレームを受けてその日のうちに対応できた",
+      supplemented:      "implication"
+    },
+    {
+      id: "③-7",
+      text: "根拠が示されない提案は、承認されない。今回のIさんの提案は承認されなかった。",
+      answerImplication: "今回のIさんの提案は承認されなかった",
+      answerPremise:     "根拠が示されない提案は、承認されない",
+      answerFact:        "今回のIさんの提案では、根拠が示されていなかった",
+      supplemented:      "fact"
+    },
+    {
+      id: "③-8",
+      text: "今回のJさんのプレゼンでは、数字による裏付けを丁寧に示した。その結果、決裁が当日中に下りた。",
+      answerImplication: "決裁が当日中に下りた",
+      answerPremise:     "数字による裏付けが丁寧に示されたプレゼンは、決裁がすぐに（当日中に）下りやすい",
+      answerFact:        "今回のJさんのプレゼンでは、数字による裏付けを丁寧に示した",
+      supplemented:      "premise"
+    },
+    {
+      id: "③-9",
+      text: "想定される反論にあらかじめ回答を用意した提案書は、社内承認を得やすい。今回のKさんの提案書では、想定される反論に先んじて回答を用意していた。",
+      answerImplication: "今回のKさんの提案書は社内承認を得た（得やすい、でも〇）",
+      answerPremise:     "想定される反論にあらかじめ回答を用意した提案書は、社内承認を得やすい",
+      answerFact:        "今回のKさんの提案書では、想定される反論に先んじて回答を用意していた",
+      supplemented:      "implication"
+    },
+    {
+      id: "③-10",
+      text: "ターゲットが明確に絞られたマーケティング施策は、費用対効果が高まる。今回のキャンペーンは費用対効果が高まった。",
+      answerImplication: "今回のキャンペーンは費用対効果が高まった",
+      answerPremise:     "ターゲットが明確に絞られたマーケティング施策は、費用対効果が高まる",
+      answerFact:        "今回のキャンペーンでは、ターゲットが明確に絞られていた",
+      supplemented:      "fact"
+    },
+  ];
+
+  const STORAGE_KEY = "drill3_state_v1";
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch { return {}; }
+  }
+
+  function saveState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function updateProgress() {
+    const state = loadState();
+    const done  = problems.filter(p => state[p.id]?.checked).length;
+    const total = problems.length;
+    const pct   = total ? (done / total * 100) : 0;
+    document.getElementById("progressBar").style.width = pct + "%";
+    document.getElementById("progressLabel").textContent = `完了: ${done} / ${total} 問`;
+  }
+
+  function handleSubmit(id) {
+    const implEl   = document.getElementById(`input-impl-${id}`);
+    const premEl   = document.getElementById(`input-prem-${id}`);
+    const factEl   = document.getElementById(`input-fact-${id}`);
+    const answerEl = document.getElementById(`answer-${id}`);
+    const btnEl    = document.getElementById(`submit-${id}`);
+    const checkEl  = document.getElementById(`check-${id}`);
+    const rowEl    = document.getElementById(`checkrow-${id}`);
+
+    implEl.disabled = true;
+    premEl.disabled = true;
+    factEl.disabled = true;
+    btnEl.disabled  = true;
+    answerEl.classList.add("visible");
+    checkEl.disabled = false;
+    rowEl.classList.add("enabled");
+
+    const state = loadState();
+    if (!state[id]) state[id] = {};
+    state[id].submitted   = true;
+    state[id].implication = implEl.value;
+    state[id].premise     = premEl.value;
+    state[id].fact        = factEl.value;
+    saveState(state);
+  }
+
+  function handleCheck(id, checked) {
+    const state = loadState();
+    if (!state[id]) state[id] = {};
+    state[id].checked = checked;
+    saveState(state);
+    document.getElementById(`card-${id}`).classList.toggle("done", checked);
+    updateProgress();
+  }
+
+  function h(str) {
+    return String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/\n/g, "<br>");
+  }
+
+  // 「補われた内容」バッジのHTML
+  function suppBadge() {
+    return '<span class="a-tag tag-supplemented">補われた内容</span>';
+  }
+
+  function renderProblems() {
+    const state = loadState();
+    const list  = document.getElementById("problemList");
+    list.innerHTML = "";
+
+    problems.forEach(p => {
+      const s           = state[p.id] || {};
+      const isSubmitted = !!s.submitted;
+      const isChecked   = !!s.checked;
+      const dis         = isSubmitted ? "disabled" : "";
+
+      const card = document.createElement("div");
+      card.className = "card" + (isChecked ? " done" : "");
+      card.id = `card-${p.id}`;
+
+      // 解答例の各行に「補われた内容」バッジを付与
+      const implSupp = p.supplemented === "implication" ? suppBadge() : "";
+      const premSupp = p.supplemented === "premise"     ? suppBadge() : "";
+      const factSupp = p.supplemented === "fact"        ? suppBadge() : "";
+
+      card.innerHTML = `
+        <div class="card-header">
+          <span class="card-number">問題 ${h(p.id)}</span>
+          <span class="done-badge">✅</span>
+        </div>
+
+        <div class="problem-text">${h(p.text)}</div>
+
+        <div class="input-group">
+          <label class="input-group-label" for="input-impl-${p.id}">意味合い：</label>
+          <textarea
+            id="input-impl-${p.id}"
+            class="answer-textarea"
+            placeholder="意味合いを入力してください"
+            rows="3"
+            ${dis}
+          >${h(s.implication || "")}</textarea>
+        </div>
+
+        <div class="input-group">
+          <label class="input-group-label" for="input-prem-${p.id}">前提条件：</label>
+          <textarea
+            id="input-prem-${p.id}"
+            class="answer-textarea"
+            placeholder="前提条件を入力してください"
+            rows="3"
+            ${dis}
+          >${h(s.premise || "")}</textarea>
+        </div>
+
+        <div class="input-group">
+          <label class="input-group-label" for="input-fact-${p.id}">個別事象：</label>
+          <textarea
+            id="input-fact-${p.id}"
+            class="answer-textarea"
+            placeholder="個別事象を入力してください"
+            rows="3"
+            ${dis}
+          >${h(s.fact || "")}</textarea>
+        </div>
+
+        <div class="show-btn-wrap">
+          <button id="submit-${p.id}" class="submit-btn" ${dis}>解答例表示</button>
+        </div>
+
+        <div class="answer-section ${isSubmitted ? "visible" : ""}" id="answer-${p.id}">
+          <div class="answer-label">解答例</div>
+          <div class="answer-tree">
+            <div class="a-implication">
+              ${h(p.answerImplication)}<span class="a-tag">意味合い</span>${implSupp}
+            </div>
+            <div class="a-child">└ ${h(p.answerPremise)}<span class="a-tag tag-premise">前提条件</span>${premSupp}</div>
+            <div class="a-child">└ ${h(p.answerFact)}<span class="a-tag tag-fact">個別事象</span>${factSupp}</div>
+          </div>
+        </div>
+
+        <div class="check-row ${isSubmitted ? "enabled" : ""}" id="checkrow-${p.id}">
+          <input type="checkbox" id="check-${p.id}" ${isChecked ? "checked" : ""} ${isSubmitted ? "" : "disabled"}>
+          <label class="check-label" for="check-${p.id}">できた</label>
+        </div>
+      `;
+
+      list.appendChild(card);
+
+      document.getElementById(`submit-${p.id}`).addEventListener("click", () => handleSubmit(p.id));
+      document.getElementById(`check-${p.id}`).addEventListener("change", e => handleCheck(p.id, e.target.checked));
+    });
+
+    updateProgress();
+  }
+
+  async function handleFinalSubmit() {
+    const nickname = document.getElementById("nickname-input").value.trim();
+    if (!nickname) {
+      alert("ニックネームを入力してください。");
+      document.getElementById("nickname-input").focus();
+      return;
+    }
+
+    const state = loadState();
+    const answers = problems.map(p => ({
+      id:          p.id,
+      implication: state[p.id]?.implication ?? "（未回答）",
+      premise:     state[p.id]?.premise     ?? "（未回答）",
+      fact:        state[p.id]?.fact        ?? "（未回答）",
+      checked:     state[p.id]?.checked     ?? false
+    }));
+
+    const payload = {
+      sheetName: SHEET_NAME,
+      nickname,
+      timestamp: new Date().toLocaleString("ja-JP"),
+      answers
+    };
+
+    const btn      = document.getElementById("finalSubmitBtn");
+    const resultEl = document.getElementById("sendResult");
+    btn.disabled    = true;
+    btn.textContent = "送信中...";
+    resultEl.className   = "send-result";
+    resultEl.textContent = "";
+
+    try {
+      await fetch(GAS_URL, {
+        method:  "POST",
+        mode:    "no-cors",
+        headers: { "Content-Type": "text/plain" },
+        body:    JSON.stringify(payload)
+      });
+
+      resultEl.textContent = "送信しました！スプレッドシートへの記録が完了しました。";
+      resultEl.className   = "send-result success";
+      btn.disabled    = false;
+      btn.textContent = "送信";
+
+    } catch (e) {
+      resultEl.textContent = "送信に失敗しました。URLやネットワーク接続を確認してください。";
+      resultEl.className   = "send-result error";
+      btn.disabled    = false;
+      btn.textContent = "送信";
+    }
+  }
+
+  // ページ読み込み時に前回の入力内容をクリア
+  localStorage.removeItem(STORAGE_KEY);
+
+  renderProblems();
+</script>
+</body>
+</html>
